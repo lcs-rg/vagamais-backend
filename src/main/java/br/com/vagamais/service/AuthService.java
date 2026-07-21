@@ -29,9 +29,8 @@ public class AuthService {
     
     @Transactional
     public Map<String, String> register(RegisterRequest request) {
-        // Verifica se email já existe
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email já cadastrado");
+            return Map.of("message", "Se o email não estiver cadastrado, você receberá um link de confirmação.");
         }
         
         // Valida data de nascimento
@@ -69,7 +68,7 @@ public class AuthService {
         // Envia email de confirmação
         emailService.enviarEmailConfirmacao(user.getEmail(), user.getNome(), token);
         
-        log.info("Usuário registrado com sucesso: {}", user.getEmail());
+        log.info("Usuário registrado: userId={}", user.getId());
         
         return Map.of("message", "Cadastro realizado com sucesso. Verifique seu email para confirmar a conta.");
     }
@@ -79,9 +78,8 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Credenciais inválidas"));
         
-        // Verifica se é usuário local
         if (!"local".equals(user.getProvider())) {
-            throw new RuntimeException("Usuário cadastrado via OAuth. Use login social.");
+            throw new RuntimeException("Credenciais inválidas");
         }
         
         // Verifica senha
@@ -91,10 +89,10 @@ public class AuthService {
         
         // Verifica se email foi confirmado
         if (!user.getEmailVerificado()) {
-            throw new RuntimeException("Email não confirmado. Verifique sua caixa de entrada.");
+            throw new RuntimeException("Credenciais inválidas");
         }
         
-        log.info("Usuário logado com sucesso: {}", user.getEmail());
+        log.info("Login realizado: userId={}", user.getId());
         
         return gerarAuthResponse(user);
     }
@@ -113,16 +111,16 @@ public class AuthService {
         user.setTokenExpiraEm(null);
         userRepository.save(user);
         
-        log.info("Email confirmado com sucesso: {}", user.getEmail());
+        log.info("Email confirmado: userId={}", user.getId());
     }
     
     @Transactional
     public void reenviarConfirmacao(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Se o email estiver cadastrado, um novo link será enviado."));
         
         if (user.getEmailVerificado()) {
-            throw new RuntimeException("Email já confirmado");
+            throw new RuntimeException("Se o email estiver cadastrado, um novo link será enviado.");
         }
         
         String token = jwtConfig.generateEmailConfirmationToken(user.getId(), user.getEmail());
@@ -132,7 +130,7 @@ public class AuthService {
         
         emailService.enviarEmailConfirmacao(user.getEmail(), user.getNome(), token);
         
-        log.info("Email de confirmação reenviado para: {}", user.getEmail());
+        log.info("Confirmacao reenviada: userId={}", user.getId());
     }
     
     @Transactional

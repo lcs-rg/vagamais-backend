@@ -28,6 +28,7 @@ public class EmailService {
     
     public void enviarEmailConfirmacao(String email, String nome, String token) {
         String linkConfirmacao = frontendUrl + "/confirmar-email?token=" + token;
+        String nomeSeguro = escapeHtml(nome != null && !nome.isBlank() ? nome : "Usuário");
         
         String html = """
             <!DOCTYPE html>
@@ -53,7 +54,7 @@ public class EmailService {
                 </div>
             </body>
             </html>
-            """.formatted(nome, linkConfirmacao, linkConfirmacao);
+            """.formatted(nomeSeguro, linkConfirmacao, linkConfirmacao);
         
         enviarEmail(email, "Confirme seu email - Vaga+", html);
     }
@@ -79,15 +80,25 @@ public class EmailService {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             
             if (response.statusCode() == 200) {
-                log.info("Email enviado com sucesso para: {}", to);
+                log.info("Email enviado com sucesso");
             } else {
-                log.error("Erro ao enviar email para {}: {} - {}", to, response.statusCode(), response.body());
+                log.error("Falha ao enviar email: status={}", response.statusCode());
                 throw new RuntimeException("Erro ao enviar email");
             }
         } catch (Exception e) {
-            log.error("Erro ao enviar email para {}: {}", to, e.getMessage());
+            log.error("Falha ao enviar email: {}", e.getMessage());
             throw new RuntimeException("Erro ao enviar email: " + e.getMessage());
         }
+    }
+    
+    private String escapeHtml(String value) {
+        if (value == null) return "";
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
     
     private String escapeJson(String value) {

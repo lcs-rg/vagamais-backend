@@ -30,6 +30,7 @@ public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final RateLimitFilter rateLimitFilter;
     
     @Value("${app.frontend.url}")
     private String frontendUrl;
@@ -78,6 +79,7 @@ public class SecurityConfig {
                 })
                 .failureHandler(oauth2FailureHandler())
             )
+            .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();

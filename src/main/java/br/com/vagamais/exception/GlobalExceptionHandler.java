@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
-        log.error("Erro: {}", ex.getMessage());
+        log.warn("RuntimeException: tipo={}", ex.getClass().getSimpleName());
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        log.error("Erro inesperado: {}", ex.getMessage(), ex);
+        log.error("Erro inesperado: tipo={}", ex.getClass().getSimpleName(), ex);
         Map<String, String> error = new HashMap<>();
         error.put("error", "Erro interno do servidor");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);

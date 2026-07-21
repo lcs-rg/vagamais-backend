@@ -52,11 +52,11 @@ app:
     resend-api-key: ${RESEND_API_KEY}
     from-address: ${EMAIL_FROM:noreply@vagamais.com.br}
   frontend:
-    url: ${FRONTEND_URL:http://localhost:4200}
+    url: ${FRONTEND_URL:http://localhost:3000}
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
 
 logging:
   level:
     br.com.vagamais: DEBUG
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO

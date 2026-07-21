@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -27,7 +28,7 @@ public class AuthService {
     private final EmailService emailService;
     
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public Map<String, String> register(RegisterRequest request) {
         // Verifica se email já existe
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email já cadastrado");
@@ -70,7 +71,7 @@ public class AuthService {
         
         log.info("Usuário registrado com sucesso: {}", user.getEmail());
         
-        return gerarAuthResponse(user);
+        return Map.of("message", "Cadastro realizado com sucesso. Verifique seu email para confirmar a conta.");
     }
     
     @Transactional

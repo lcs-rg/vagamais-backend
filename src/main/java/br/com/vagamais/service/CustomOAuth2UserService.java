@@ -36,13 +36,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         User user;
         if (userOptional.isPresent()) {
-            // Usuário existente - atualiza provider se necessário
             user = userOptional.get();
-            if (user.getProvider() == null || user.getProvider().equals("local")) {
-                user.setProvider(provider);
-                user.setProviderId(providerId);
-                user.setEmailVerificado(true); // OAuth já verifica o email
-                userRepository.save(user);
+            if (user.getProvider() != null && user.getProvider().equals(provider)) {
+                // Usuário existente do mesmo provider - login normal
+            } else {
+                throw new OAuth2AuthenticationException(
+                    "Já existe uma conta com este email. Faça login com email e senha."
+                );
             }
         } else {
             // Novo usuário
